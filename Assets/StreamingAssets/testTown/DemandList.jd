@@ -1,0 +1,75 @@
+
+{
+	"data" :
+	{
+		"DemandTypes" : [
+			{
+				"DemandName" : "Food"
+			},
+			{
+				"DemandName" : "Wear"
+			},
+			{
+				"DemandName" : "House"
+			},
+			{
+				"DemandName" : "Safty"
+			},
+			{
+				"DemandName" : "Enjoyment"
+			},
+			{
+				"DemandName" : "Wealth"
+			}
+		],
+		"Levels" : [
+			{
+				"Level" : 1,
+				"Demands" : [
+					{"DemandName" : "Food", "DemandLevel" : 1, "Weigth":1}
+				]
+			},
+			{
+				"Level" : 2,
+				"Demands" : [
+					{"DemandName" : "Food", "DemandLevel" : 1, "Weigth":1},
+					{"DemandName" : "Wear", "DemandLevel" : 1, "Weigth":1},
+					{"DemandName" : "House", "DemandLevel" : 1, "Weigth":1}
+				]
+			},
+			{
+				"Level" : 3,
+				"Demands" : [
+					{"DemandName" : "Food", "DemandLevel" : 2, "Weigth":1},
+					{"DemandName" : "Wear", "DemandLevel" : 2, "Weigth":1},
+					{"DemandName" : "House", "DemandLevel" : 2, "Weigth":1},
+					{"DemandName" : "Safty", "DemandLevel" : 1, "Weigth":1},
+					{"DemandName" : "Enjoyment", "DemandLevel" : 1, "Weigth":1},
+					{"DemandName" : "Wealth", "DemandLevel" : 1, "Weigth":1}
+				]
+			},
+			{
+				"Level" : 4,
+				"Demands" : [
+					{"DemandName" : "Food", "DemandLevel" : 3, "Weigth":1},
+					{"DemandName" : "Wear", "DemandLevel" : 3, "Weigth":1},
+					{"DemandName" : "House", "DemandLevel" : 3, "Weigth":1},
+					{"DemandName" : "Safty", "DemandLevel" : 2, "Weigth":1},
+					{"DemandName" : "Enjoyment", "DemandLevel" : 2, "Weigth":1},
+					{"DemandName" : "Wealth", "DemandLevel" : 2, "Weigth":1}
+				]
+			},
+			{
+				"Level" : 5,
+				"Demands" : [
+					{"DemandName" : "Food", "DemandLevel" : 4},
+					{"DemandName" : "Wear", "DemandLevel" : 4},
+					{"DemandName" : "House", "DemandLevel" : 4},
+					{"DemandName" : "Safty", "DemandLevel" : 3},
+					{"DemandName" : "Enjoyment", "DemandLevel" : 3},
+					{"DemandName" : "Wealth", "DemandLevel" : 3}
+				]
+			}
+		]
+	}
+}

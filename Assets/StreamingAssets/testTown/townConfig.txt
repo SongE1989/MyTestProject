@@ -1,0 +1,14 @@
+{"BuildingConfig":{
+	"农场":{
+		"buildingName":"农场",
+		"onDayPassEffect":
+			[
+			{"effectType":"itemConsum", "itemName":"water", "num":10},
+			{"effectType":"itemConsum", "itemName":"manPower", "num":10}
+			],
+		"onSeasonPassEffect":[
+			{"effectType":"itemProduce", "itemName":"wheat", "num":100}
+		],
+		"onYearPassEffect":[]
+	}
+}}

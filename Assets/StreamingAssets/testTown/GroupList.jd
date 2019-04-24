@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "GroupName": "Farmer",
+      "Consume": [
+        {
+          "ItemName": "Tools",
+          "Num": 1
+        }
+      ],
+      "Produce": [
+        {
+          "ItemName": "Wheat",
+          "Num": 2
+        }
+      ],
+      "Keep": [
+        {
+          "ItemName": "Wheat",
+          "Num": 20
+        }
+      ]
+    },
+    {
+      "GroupName": "Smith",
+      "Consume": [
+        {
+          "ItemName": "Wheat",
+          "Num": 1
+        }
+      ],
+      "Produce": [
+        {
+          "ItemName": "Tools",
+          "Num": 1
+        }
+      ],
+      "Keep": [
+        {
+          "ItemName": "Wheat",
+          "Num": 20
+        }
+      ]
+    }
+  ]
+}

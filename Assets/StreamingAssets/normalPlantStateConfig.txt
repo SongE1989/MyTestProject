@@ -1,0 +1,22 @@
+{	
+	"StateList" : [{
+			"StateName" : "seed",
+			"TimeToNext" : 5,
+			"EnergyToNext" : 0
+		}, {
+			"StateName" : "small",
+			"TimeToNext" : 10,
+			"EnergyToNext" : 100
+		}, {
+			"StateName" : "mature",
+			"TimeToNext" : 10,
+			"EnergyToNext" : 200
+		}, {
+			"StateName" : "fruit",
+			"TimeToNext" : 0,
+			"EnergyToNext" : 0
+		}
+	],
+
+	"StateCircle" : [1, 2, 3, 2]
+}

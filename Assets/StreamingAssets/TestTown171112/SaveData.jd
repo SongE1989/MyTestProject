@@ -1,0 +1,91 @@
+
+{
+	"Date" : 2,
+	"locationList" : [
+		{
+			"MartkePrice" :
+			{
+				"Wheat" : 100,
+				"Tools" : 100
+			},
+			"Groups" : [
+				{
+					"Name" : "Farmer01",
+					"Type" :
+					{
+						"GroupName" : "Farmer",
+						"Consume" : [
+							{
+								"ItemName" : "Tools",
+								"Num" : 1.0
+							}
+						],
+						"Produce" : [
+							{
+								"ItemName" : "Wheat",
+								"Num" : 2.0
+							}
+						],
+						"Keep" : [
+							{
+								"ItemName" : "Wheat",
+								"Num" : 20.0
+							},
+							{
+								"ItemName" : "Tools",
+								"Num" : 5.0
+							}
+						]
+					},
+					"Items" :
+					{
+						"Money" : 394,
+						"ItemDic" :
+						{
+							"Wheat" : 1.0,
+							"Tools" : 4.0
+						}
+					}
+				},
+				{
+					"Name" : "Smith01",
+					"Type" :
+					{
+						"GroupName" : "Smith",
+						"Consume" : [
+							{
+								"ItemName" : "Wheat",
+								"Num" : 1.0
+							}
+						],
+						"Produce" : [
+							{
+								"ItemName" : "Tools",
+								"Num" : 1.0
+							}
+						],
+						"Keep" : [
+							{
+								"ItemName" : "Wheat",
+								"Num" : 20.0
+							},
+							{
+								"ItemName" : "Tools",
+								"Num" : 5.0
+							}
+						]
+					},
+					"Items" :
+					{
+						"Money" : 405,
+						"ItemDic" :
+						{
+							"Wheat" : 19.0,
+							"Tools" : 6.0
+						}
+					}
+				}
+			]
+		}
+	]
+}

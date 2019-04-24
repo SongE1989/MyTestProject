@@ -1,0 +1,27 @@
+{
+	"data" : [
+	{"ItemName":"Bread","ItemType":["Food"],"BasePrice":50}, 
+	{"ItemName":"Cabbage","ItemType":["Food"],"BasePrice":20},
+	{"ItemName":"Apple","ItemType":["Food"],"BasePrice":30},
+	{"ItemName":"Wheat","ItemType":["Food"],"BasePrice":100},
+	{"ItemName":"Pork","ItemType":["Food"],"BasePrice":80},
+	{"ItemName":"Chicken","ItemType":["Food"],"BasePrice":60},
+	{"ItemName":"Fish","ItemType":["Food"],"BasePrice":40},
+	{"ItemName":"Salt","ItemType":["Resource"],"BasePrice":250},
+	{"ItemName":"Oil","ItemType":["Resource"],"BasePrice":400},
+	{"ItemName":"Flax","ItemType":["Resource"],"BasePrice":100},
+	{"ItemName":"FlaxCloth","ItemType":["Resource"],"BasePrice":120}, 
+	{"ItemName":"FlaxClothes","ItemType":["Resource"],"BasePrice":220},
+	{"ItemName":"Cotton","ItemType":["Resource"],"BasePrice":130},
+	{"ItemName":"CottonCloth","ItemType":["Resource"],"BasePrice":150},
+	{"ItemName":"CottonClothes","ItemType":["Resource"],"BasePrice":240},
+	{"ItemName":"Wool","ItemType":["Resource"],"BasePrice":150},
+	{"ItemName":"WoolCloth","ItemType":["Resource"],"BasePrice":170},
+	{"ItemName":"WoolClothes","ItemType":["Resource"],"BasePrice":270},
+	{"ItemName":"Iron","ItemType":["Resource"],"BasePrice":300},
+	{"ItemName":"Wood","ItemType":["Resource"],"BasePrice":200},
+	{"ItemName":"Stone","ItemType":["Resource"],"BasePrice":400},
+	{"ItemName":"Tools","ItemType":["Resource"],"BasePrice":100}
+
+	]
+}
