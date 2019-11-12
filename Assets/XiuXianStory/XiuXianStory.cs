@@ -1,419 +1,241 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using LitJson;
 using UnityEngine;
+using UnityEngine.UI;
+
 namespace XiuXianStory
 {
-    public interface INameID
+
+    public class XiuXianStory : MonoBehaviour
     {
-        string NameID { get; }
-    }
+        public TextAsset FamilyNameAsset;
+        public int Day = 1;
+        //public List<Person> PersonList;
+        public Dictionary<string, Person> PersonDic;
+        public static XiuXianStory Instance;
+        //[TextArea]
+        private string infoShow;
+        private Battle curCombat;
+        
 
-    public class DataManager
-    {
-        static DataManager _instance;
-        public static DataManager Instance
+
+        private void Start()
         {
-            get
+            Instance = this;
+            //var commonDesire = DataManager.Instance.DesireDic["渡过飞升雷劫"];
+            PersonDic = new Dictionary<string, Person>();
+            PersonDic.AddNameIDItem(new Person() { NameID = "王立", Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["元婴期"] }.Initilize());
+            PersonDic["王立"].TheManaSystem.Set(100,10,20);
+            int age, lifeTime;
+            DataHelper.GetRandomAgeAndLifeTime(3, out age, out lifeTime);
+            PersonDic["王立"][Attr.MaxHP] = 100;
+            PersonDic["王立"][Attr.Age] = age;
+            PersonDic["王立"][Attr.LifeTime] = lifeTime;
+            addCommonDesire(PersonDic["王立"]);
+
+
+            //PersonDic.AddNameIDItem(new Person() { NameID = "李寻仙", Age = 30, Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["金丹期"] }.Initilize().AddRootDesire(commonDesire));
+            //PersonDic["李寻仙"].TheManaSystem.Set(50, 3, 10);
+            //PersonDic["李寻仙"].MaxHP = 50;
+
+            //PersonDic.AddNameIDItem(new Person() { NameID = "张恒", Age = 18, Sex = EnumSex.Female, TheLevel = DataManager.Instance.LevelDic["筑基期"] }.Initilize().AddRootDesire(commonDesire));
+            //PersonDic["张恒"].TheManaSystem.Set(10, 1, 5);
+            //PersonDic["张恒"].LearnedMagicList.Add(DataManager.Instance.MagicDic["气弹术"]);
+            //PersonDic["张恒"].LearnedMagicList.Add(DataManager.Instance.MagicDic["烈阳斩"]);
+            //PersonDic["张恒"].MaxHP = 50;
+
+            //PersonDic.AddNameIDItem(new Person() { NameID = "赵玉虎", Age = 12, Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["炼气期"] }.Initilize().AddRootDesire(commonDesire));
+            //PersonDic["赵玉虎"].TheManaSystem.Set(3, 0.5f, 1);
+            //PersonDic["赵玉虎"].LearnedMagicList.Add(DataManager.Instance.MagicDic["气弹术"]);
+            //PersonDic["赵玉虎"].LearnedMagicList.Add(DataManager.Instance.MagicDic["土墙术"]);
+            //PersonDic["赵玉虎"].MaxHP = 3;
+
+
+        }
+
+        void addCommonDesire(Person person)
+        {
+            //person.AddRootDesire(DataManager.Instance.DesireDic["渡过飞升雷劫"]);
+            person.AddRootDesire(new AttrDesire(AttrDesire.AttrDesireType.Add, "LifeTime", 1));
+        }
+
+        void addRandomPerson()
+        {
+            int tryTime = 10;
+            while(tryTime > 0)
             {
-                if (_instance == null)
+                var randomName = NameCreator.GetRandomName();
+                if (!PersonDic.ContainsKey(randomName))
                 {
-                    _instance = new DataManager();
-                    _instance.initBaseDefine();
-                    _instance.initDesires();
-                    _instance.initBehaviorConditions();
-                    _instance.initDesireAvailableBehaviorList();
+                    var tar = new Person()
+                    {
+                        NameID = randomName,
+                        Sex = Random.Range(0, 1f) > 0.5f ? EnumSex.Male : EnumSex.Female,
+                        TheLevel = DataManager.Instance.LevelDic["炼气期"]
+                    }.Initilize();
+                    int age, lifeTime;
+                    DataHelper.GetRandomAgeAndLifeTime(0, out age, out lifeTime);
+                    PersonDic.AddNameIDItem(tar);
+                    addCommonDesire(tar);
+                    tar.TheManaSystem.Set(3, 0.5f, 1);
+                    tar.LearnedMagicList.Add(DataManager.Instance.MagicDic["气弹术"]);
+                    tar.LearnedMagicList.Add(DataManager.Instance.MagicDic["土墙术"]);
+                    //tar.MaxHP = 3;
+                    tar[Attr.Age] = age;
+                    tar[Attr.LifeTime] = lifeTime;
+                    tar[Attr.MaxHP] = 3;
+                    Debug.Log("AddRandomPerson "+randomName);
+                    break;
                 }
-                return _instance;
+                tryTime--;
+                if (tryTime <= 0)
+                    Debug.Log("随机人物添加失败, 太多重复名称");
             }
         }
 
-        //具有唯一性,方便引用
-        public Dictionary<string, Level> LevelDic;
-        public Dictionary<string, PersonBehavior> BehaviorDic;
-        public Dictionary<string, Item> ItemDic;
-        public Dictionary<string, Desire> DesireDic;
-
-        /// <summary>Level Behavior Item</summary>
-        void initBaseDefine()
+        private void Update()
         {
-            LevelDic = new Dictionary<string, Level>();
-            List<Level> levelList = new List<Level>() {
-                new Level() { LevelName = "炼气期", LevelIndex = 1, LevelType = "修仙大道" },
-                new Level() { LevelName = "筑基期", LevelIndex = 2, LevelType = "修仙大道" },
-                new Level() { LevelName = "金丹期", LevelIndex = 3, LevelType = "修仙大道" },
-                new Level() { LevelName = "元婴期", LevelIndex = 4, LevelType = "修仙大道" },
-                new Level() { LevelName = "一级妖兽", LevelIndex = 1, LevelType = "妖修之道" },
-                new Level() { LevelName = "二级妖兽", LevelIndex = 1, LevelType = "妖修之道" },
-                new Level() { LevelName = "三级妖兽", LevelIndex = 1, LevelType = "妖修之道" },
-            };
-            for (int i = 0; i < levelList.Count; i++)
+            if(Input.GetKey(KeyCode.Space))
             {
-                var level = levelList[i];
-                LevelDic.Add(level.LevelName, level);
+                updateGameLogic();
+                if (showDetailHistory)
+                    printStory(false);
+                else
+                    printStateInfo();
             }
 
-            BehaviorDic = new Dictionary<string, PersonBehavior>();
-            List<PersonBehavior> behaviorList = new List<PersonBehavior>()
+
+        }
+
+        private bool showDetailHistory = true;
+        private float curMessageLevel;
+        private void OnGUI()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginArea(new Rect(0, 0, Screen.width - 300, Screen.height));
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+            GUILayout.TextArea(infoShow);
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+
+            GUILayout.BeginArea(new Rect(Screen.width - 300, 0, 300, Screen.height));
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("<<"))
+                curMessageLevel -= 1;
+            if(GUILayout.Button("<"))
+                curMessageLevel -= 0.1f;
+            var messageLevelInput = GUILayout.TextField(curMessageLevel.ToString());
+            float.TryParse(messageLevelInput, out curMessageLevel);
+            if (GUILayout.Button(">"))
+                curMessageLevel += 0.1f;
+            if (GUILayout.Button(">>"))
+                curMessageLevel += 1f;
+            curMessageLevel = Mathf.Clamp(curMessageLevel, 0, 10);
+
+            GUILayout.EndHorizontal();
+
+            showDetailHistory = GUILayout.Toggle(showDetailHistory, "显示详细历史");
+            if (GUILayout.Button("UpdateGameLogic"))
             {
-                new PersonBehavior(){ NameID = "渡过飞升雷劫", BasePossibility = 0.1f },
-                new PersonBehavior(){ NameID = "凝结元婴", BasePossibility = 0.2f },
-                new PersonBehavior(){ NameID = "结成金丹", BasePossibility = 0.3f },
-                new PersonBehavior(){ NameID = "凝气筑基", BasePossibility = 0.4f },
-                new PersonBehavior(){ NameID = "修炼", BasePossibility = 0.5f },
-                new PersonBehavior(){ NameID =  "开采灵石", BasePossibility = 1f},//应该设置行为的结果, Desire的AvailableBehaviorList从所有行为中遍历有对应结果的
-            };
-            for (int i = 0; i < behaviorList.Count; i++)
-            {
-                var behavior = behaviorList[i];
-                BehaviorDic.Add(behavior.NameID, behavior);
+                updateGameLogic();
+                if (showDetailHistory)
+                    printStory(false);
+                else
+                    printStateInfo();
             }
-
-            ItemDic = new Dictionary<string, Item>();
-            List<Item> itemList = new List<Item>()
+            if (GUILayout.Button("AddRandomNPC"))
             {
-                new Item(){NameID = "灵石"},
-                new Item(){ NameID = "筑基丹"},
-                new Item(){NameID = "金灵石"},
-                new Item(){NameID = "木灵石"},
-                new Item(){NameID = "水灵石"},
-                new Item(){NameID = "火灵石"},
-                new Item(){NameID = "土灵石"},
-            };
-            for (int i = 0; i < itemList.Count; i++)
-            {
-                var item = itemList[i];
-                ItemDic.Add(item.NameID, item);
+                addRandomPerson();
             }
-        }
-
-        void initDesires()
-        {
-            DesireDic = new Dictionary<string, Desire>();
-            List<Desire> desireList = new List<Desire>() { 
-                //behavior desires
-                new BehaviorDesire() { TheBehavior = BehaviorDic["渡过飞升雷劫"] },
-
-                //level desires
-                new LevelDesire(LevelDic["炼气期"]),
-                new LevelDesire(LevelDic["筑基期"]),
-                new LevelDesire(LevelDic["金丹期"]),
-                new LevelDesire(LevelDic["元婴期"]),
-            };
-            for (int i = 0; i < desireList.Count; i++)
+            if (GUILayout.Button("Print All Story"))
             {
-                var desire = desireList[i];
-                DesireDic.Add(desire.NameID, desire);
+                printStory(true);
             }
-            foreach (var item in ItemDic.Values)
+            if (GUILayout.Button("Print State Info"))
             {
-                DesireDic.Add(item.NameID, new ItemDesire(item, 1, true));//ItemDesire有数量区别
+                printStateInfo();
             }
-        }
-
-        void initBehaviorConditions()
-        {
-            BehaviorDic["凝气筑基"].ConditionList = new List<Condition>(){
-                new Condition(){ TheDesire = DesireDic["炼气期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["筑基丹"],1, true), IsNecessary = false, PossiblityMulti = 1.3f },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],100, true), IsNecessary = false, PossiblityMulti = 1.3f },
-            };
-            BehaviorDic["结成金丹"].ConditionList = new List<Condition>(){
-                new Condition(){ TheDesire = DesireDic["筑基期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["金髓丸"],1, true), IsNecessary = false, PossiblityMulti = 1.3f },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],1000, true), IsNecessary = false, PossiblityMulti = 1.3f },
-            };
-            BehaviorDic["凝结元婴"].ConditionList = new List<Condition>(){
-                new Condition(){ TheDesire = DesireDic["金丹期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["凝婴丹"],1, true), IsNecessary = false, PossiblityMulti = 1.3f },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],10000, true), IsNecessary = false, PossiblityMulti = 1.3f },
-            };
-            BehaviorDic["渡过飞升雷劫"].ConditionList = new List<Condition>(){
-                new Condition(){ TheDesire = DesireDic["元婴期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],100000, true), IsNecessary = false, PossiblityMulti = 1.3f },
-                new Condition(){ TheDesire = new MultiDesire(){ ChildList=new List<Desire>(){
-                        new ItemDesire(ItemDic["金灵石"],1, true),
-                        new ItemDesire(ItemDic["木灵石"],1, true),
-                        new ItemDesire(ItemDic["水灵石"],1, true),
-                        new ItemDesire(ItemDic["火灵石"],1, true),
-                        new ItemDesire(ItemDic["土灵石"],1, true),
-                    } }, IsNecessary = false, PossiblityMulti = 1.3f},
-            };
-        }
-
-        void initDesireAvailableBehaviorList()
-        {
-            //对境界的需求, 可由单人的独立行为完成
-            //对物品的需求, 可能会产生多人行为(索要,购买,抢夺等)
-            //AvailableBehaviorList = new List<PersonBehavior>() {
-            //    BehaviorDic["凝气筑基"]
-            //}
-            DesireDic["筑基期"].AvailableBehaviorList = new List<PersonBehavior>(){
-                BehaviorDic["凝气筑基"]
-            };
-            DesireDic["金丹期"].AvailableBehaviorList = new List<PersonBehavior>(){
-                BehaviorDic["结成金丹"]
-            };
-            DesireDic["元婴期"].AvailableBehaviorList = new List<PersonBehavior>(){
-                BehaviorDic["凝结元婴"]
-            };
-            DesireDic["渡过飞升雷劫"].AvailableBehaviorList = new List<PersonBehavior>(){
-                BehaviorDic["渡过飞升雷劫"]
-            };
-
-
-        }
-
-        public class Condition
-        {
-            public Desire TheDesire;
-            public bool IsNecessary;//是否必要条件
-            public float PossiblityMulti;//可能性加成 1.1 = 10%
-        }
-
-        public class PersonBehavior : INameID
-        {
-            public string NameID { get; set; }
-            public List<Condition> ConditionList;
-            public float BasePossibility = 0.5f;
-            public Dictionary<Result, float> ResultDic;//TODO 如何描述互斥结果?
-        }
-
-        public class Result
-        {
-            public List<Desire> DesireList;
-        }
-
-        public class Level : INameID
-        {
-            public string NameID { get { return LevelType + "-" + LevelName; } }
-            public string LevelType;
-            public string LevelName;
-            public int LevelIndex;
-        }
-
-        //与某人切磋, 拜访某人, 飞升(通过具体事件完成)
-        //达到某种境界(LevelDesire通过Level满足完成)
-        //拥有某些物品(ItemDesire通过拥有物品完成)
-        //拜某人为师, (RelationDesire关系状态)
-        //成为门主(PositionDesire)
-
-        //TODO 考虑不欲模式, 行为-结果中包含负面结果, 由此带来对行为选择偏好改变
-
-        //desire来源: 
-        //1.初衷/本心(修仙大道, 剑道造诣, 炼丹造诣, 长生, 逍遥, 权势)
-        //2.当前遭遇/状态(情仇, 负伤)
-        public class Desire : INameID
-        {
-            public static void Initilize()
+            if(GUILayout.Button("开启战斗"))
             {
-                //飞升 需要:行为-渡过飞升天劫
-                //行为-渡过飞升天劫 需要  Condition-境界[元婴后期]大圆满
-                //Condition-境界[元婴后期]大圆满 需要 境界[元婴后期] + 提升法力
-
-                //行为=>结果? 结果=需求?
-                //行为的前置条件 是 结果?/需求?/其他
-
-                //筑基-结丹-元婴-飞升
-
-                //var finalDesire = new Desire()
-                //{
-                //    DesireName = "飞升仙界",
-                //    AvailableBehaviorList = new List<PersonBehavior> {
-                //        new PersonBehavior(){
-                //            BehaviorName = "渡过飞升雷劫",
-                //            ConditionList = new List<Desire>{
-                //                new LevelDesire() {
-                //                    TheLevel = new Level(){ LevelName = "元婴期" },
-                //                    AvailableBehaviorList = new List<PersonBehavior>(){
-                //                        new PersonBehavior(){
-                //                            BehaviorName =  "凝结元婴" ,
-                //                            ConditionList = new List<Desire>(){
-                //                                new LevelDesire() {
-                //                                    TheLevel = new Level() { LevelName = "结丹期"} ,
-                //                                    AvailableBehaviorList = new List<PersonBehavior>(){ new PersonBehavior() {
-                //                                        BehaviorName = "结成金丹",
-                //                                        ConditionList = new List<Desire>(){ new LevelDesire() { TheLevel = new Level() { LevelName = "筑基期"} } }
-                //                                    } }
-                //                                } } }
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-                //};
+                var p1 = PersonDic["张恒"];
+                var p2 = PersonDic["赵玉虎"];
+                curCombat = BattleManager.StartCombat(p1, p2);
+                infoShow = p1.Title + "向" + p2.Title + "发起挑战";
 
             }
-
-            public virtual string NameID { get { return "欲求"; } }
-            public List<PersonBehavior> AvailableBehaviorList;
-        }
-
-        public class MultiDesire : Desire
-        {
-            public List<Desire> ChildList;
-            //TODO override NameID
-        }
-
-        public class BehaviorDesire : Desire
-        {
-            public PersonBehavior TheBehavior;
-            public override string NameID
+            if(GUILayout.Button("战斗回合"))
             {
-                get
+                if(curCombat == null)
                 {
-                    return TheBehavior.NameID;
+                    infoShow = "当前无战斗";
+                }
+                else
+                {
+                    curCombat.UpdateLogic();
+                    infoShow = curCombat.GetCurrentMessage();
                 }
             }
-            public BehaviorDesire()
+            if(GUILayout.Button("战斗信息(全部回合)"))
             {
+                infoShow = curCombat.GetAllMessage();
+            }
+            GUILayout.EndVertical();
+            GUILayout.EndArea();
 
-            }
-            public BehaviorDesire(PersonBehavior behavior)
-            {
-                TheBehavior = behavior;
-            }
+            GUILayout.EndHorizontal();
         }
 
-        public class LevelDesire : Desire
+        Vector2 scrollPos;
+
+
+        void updateGameLogic()
         {
-            public Level TheLevel;
-            public override string NameID
+            foreach (var person in PersonDic.Values)
             {
-                get
+                person.UpdateGameLogic();
+            }
+            Day++;
+        }
+
+        void printStateInfo()
+        {
+            StringBuilder info = new StringBuilder();
+            info.Append("当前日期" + Day+"\r\n");
+            foreach (var person in PersonDic.Values)
+            {
+                info.Append("--------" + person.Title + "--------\r\n");
+                info.Append(person.GetStateInfo());
+                info.Append("\r\n");
+            }
+            infoShow = info.ToString();
+            Debug.Log(info.ToString());
+        }
+
+        void printStory(bool all)
+        {
+            StringBuilder history = new StringBuilder();
+            history.Append("当前日期" + Day + "----------------------------------\r\n");
+            foreach (var person in PersonDic.Values)
+            {
+                history.Append("--------"+person.Title+"--------\r\n");
+                if (all)
+                    history.AppendLine(person.GetAllHistoryStr(curMessageLevel));
+                else
                 {
-                    return TheLevel.LevelName;
+                    var story = person.GetLastStory(curMessageLevel);
+                    if(story != null)
+                        history.AppendLine(story.ToString());
                 }
             }
-            public LevelDesire(Level level)
-            {
-                TheLevel = level;
-            }
+            history.Append("----------------------------------\r\n");
+            infoShow = history.ToString();
+            Debug.Log(history.ToString());
         }
 
-        public class ItemDesire : Desire
-        {
-            public Item TheItem;
-            public int Num;
-            public bool Consume;
-            public override string NameID
-            {
-                get
-                {
-                    return TheItem.NameID + " " + Num;
-                }
-            }
-            public ItemDesire(Item item, int num, bool consume)
-            {
-                TheItem = item;
-                Num = num;
-                Consume = consume;
-            }
-        }
-
-        public class Item : INameID
-        {
-            public string NameID { get; set; }
-        }
-
-        public class DesireSystem
-        {
-            public Person ThePerson;
-            public Desire FinalDesire;
-
-            public void Initilize()
-            {
-                //FinalDesire = new Desire() { DesireName = "飞升"};
-            }
-
-            public Desire GetCurrentDesire()
-            {
-                return null;
-            }
-        }
-
-        public class PersonalSystem
-        {
-            public Person ThePerson;
-
-            public void Initilize()
-            {
-
-            }
-
-            public PersonBehavior GetBehaviorByDesire(Desire desire)
-            {
-                return null;//TODO
-            }
-        }
-
-
-        public enum EnumSex { Male, Female }
-
-        public class Person
-        {
-            public string Name;
-            public int Age;
-            public EnumSex Sex;
-            public DesireSystem TheDesireSystem;
-            public PersonalSystem ThePersonalSystem;
-            public Level TheLevel;
-
-            public Person Initilize()
-            {
-                TheDesireSystem = new DesireSystem() { ThePerson = this };
-                ThePersonalSystem = new PersonalSystem() { ThePerson = this };
-                return this;
-            }
-
-            public void UpdateGameLogic()
-            {
-
-            }
-        }
-
-        public class StoryBase
-        {
-
-        }
-
-
-        public class Story : StoryBase
-        {
-            public string When;
-            public string Where;
-            public string Who;
-            public string What;
-            public string Why;
-        }
-
-
-        public class XiuXianStory : MonoBehaviour
-        {
-            public int Day = 1;
-            public List<Person> PersonList;
-
-
-            private void Start()
-            {
-                PersonList.Add(new Person() { Name = "王立", Age = 50, Sex = EnumSex.Male, TheLevel = new Level() { LevelName = "结丹期" } }.Initilize());
-                PersonList.Add(new Person() { Name = "李寻仙", Age = 20, Sex = EnumSex.Male, TheLevel = new Level() { LevelName = "结丹期" } }.Initilize());
-                PersonList.Add(new Person() { Name = "张玉", Age = 18, Sex = EnumSex.Female, TheLevel = new Level() { LevelName = "结丹期" } }.Initilize());
-            }
-
-            private void Update()
-            {
-                if (Input.GetKeyDown(KeyCode.Alpha1))
-                {
-                    updateGameLogic();
-                }
-            }
-
-            void updateGameLogic()
-            {
-
-            }
-
-        }
     }
 }

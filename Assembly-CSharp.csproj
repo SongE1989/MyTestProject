@@ -699,14 +699,24 @@
     <Compile Include="Assets\TradeWorld\World170729.cs" />
     <Compile Include="Assets\UI\PieGraph.cs" />
     <Compile Include="Assets\Water\Director.cs" />
+    <Compile Include="Assets\XiuXianStory\CombatManager.cs" />
+    <Compile Include="Assets\XiuXianStory\DataDefine.cs" />
+    <Compile Include="Assets\XiuXianStory\DataHelper.cs" />
+    <Compile Include="Assets\XiuXianStory\DataImport.cs" />
+    <Compile Include="Assets\XiuXianStory\Desire.cs" />
+    <Compile Include="Assets\XiuXianStory\Message.cs" />
+    <Compile Include="Assets\XiuXianStory\NameCreator.cs" />
+    <Compile Include="Assets\XiuXianStory\Person.cs" />
     <Compile Include="Assets\XiuXianStory\XiuXianStory.cs" />
     <None Include="Assets\DOTween\readme.txt" />
+    <None Include="Assets\Resources\XiuXianFolder\百家姓.txt" />
     <None Include="Assets\Anima2D\Examples\Shaders\VisibleInsideMask.shader" />
     <None Include="Assets\Anima2D\Examples\Shaders\VisibleOutsideMask.shader" />
     <None Include="Assets\Anima2D\Version.txt" />
     <None Include="Assets\StreamingAssets\test170718.txt" />
     <None Include="Assets\StreamingAssets\webList.txt" />
     <None Include="Assets\StreamingAssets\testEHPage.txt" />
+    <None Include="Assets\XiuXianStory\3500常用字.txt" />
     <None Include="Assets\StreamingAssets\normalPlantStateConfig.txt" />
     <None Include="Assets\StreamingAssets\xmlTest.txt" />
     <None Include="Assets\XXTODO.txt" />
@@ -718,10 +728,12 @@
     <None Include="Assets\Anima2D\Examples\Shaders\Unlit-Alpha-Cull-off.shader" />
     <None Include="Assets\Anima2D\Licenses.txt" />
     <None Include="Assets\TestCrawler\xmlTest - 副本.txt" />
+    <None Include="Assets\XiuXianStory\DataImport.txt" />
     <None Include="Assets\Anima2D\Examples\Shaders\VertexLitOneDirectional.shader" />
     <None Include="Assets\DOTween\DOTween46.xml" />
     <None Include="Assets\StreamingAssets\1.txt" />
     <None Include="Assets\Anima2D\Readme.txt" />
+    <None Include="Assets\XiuXianStory\XXStoryTODO.txt" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/UnitySpace/NewPro/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

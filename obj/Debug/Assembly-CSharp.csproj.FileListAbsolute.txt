@@ -182,3 +182,5 @@ D:\UnitySpace\NewPro\Temp\bin\Debug\UnityEngine.UnityTestProtocolModule.xml
 D:\UnitySpace\NewPro\Temp\bin\Debug\UnityEngine.VFXModule.xml
 D:\UnitySpace\NewPro\Temp\bin\Debug\UnityEngine.TestRunner.xml
 D:\UnitySpace\NewPro\Temp\bin\Debug\nunit.framework.xml
+D:\UnitySpace\NewPro\Temp\bin\Debug\UnityEngine.Advertisements.dll
+D:\UnitySpace\NewPro\Temp\bin\Debug\UnityEngine.Advertisements.Editor.dll
