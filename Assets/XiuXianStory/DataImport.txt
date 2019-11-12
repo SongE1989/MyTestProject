@@ -1,0 +1,19 @@
+﻿{
+	"DataType":"BehaviorResults"
+	"Data":[
+		{
+			"BehaviorNameID":"凝气筑基"
+			"ResultGroupDic":{
+				"GroupName":"成功",
+				"ResultList":[
+					{
+						"ResultType":"LevelChange",
+						"TargetLevel":"筑基期",
+					}
+				]
+				"PossibleWeight":100
+			}
+		}
+
+	]
+}
