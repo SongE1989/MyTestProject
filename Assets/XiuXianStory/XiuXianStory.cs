@@ -27,14 +27,14 @@ namespace XiuXianStory
             Instance = this;
             //var commonDesire = DataManager.Instance.DesireDic["渡过飞升雷劫"];
             PersonDic = new Dictionary<string, Person>();
-            PersonDic.AddNameIDItem(new Person() { NameID = "王立", Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["元婴期"] }.Initilize());
-            PersonDic["王立"].TheManaSystem.Set(100,10,20);
+            PersonDic.AddNameIDItem(new Person() { NameID = "韩立", Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["炼气期"] }.Initilize());
+            PersonDic["韩立"].TheManaSystem.Set(100,10,20);
             int age, lifeTime;
-            DataHelper.GetRandomAgeAndLifeTime(3, out age, out lifeTime);
-            PersonDic["王立"][Attr.MaxHP] = 100;
-            PersonDic["王立"][Attr.Age] = age;
-            PersonDic["王立"][Attr.LifeTime] = lifeTime;
-            addCommonDesire(PersonDic["王立"]);
+            DataHelper.GetRandomAgeAndLifeTime(0, out age, out lifeTime);
+            PersonDic["韩立"][Attr.MaxHP] = 100;
+            PersonDic["韩立"][Attr.Age] = age;
+            PersonDic["韩立"][Attr.LifeTime] = lifeTime;
+            addCommonDesire(PersonDic["韩立"]);
 
 
             //PersonDic.AddNameIDItem(new Person() { NameID = "李寻仙", Age = 30, Sex = EnumSex.Male, TheLevel = DataManager.Instance.LevelDic["金丹期"] }.Initilize().AddRootDesire(commonDesire));
@@ -58,8 +58,8 @@ namespace XiuXianStory
 
         void addCommonDesire(Person person)
         {
-            //person.AddRootDesire(DataManager.Instance.DesireDic["渡过飞升雷劫"]);
-            person.AddRootDesire(new AttrDesire(AttrDesire.AttrDesireType.Add, "LifeTime", 1));
+            person.AddRootDesire(DataManager.Instance.DesireDic["渡过飞升雷劫"]);
+            //person.AddRootDesire(new AttrDesire(AttrDesire.AttrDesireType.Add, "LifeTime", 1));
         }
 
         void addRandomPerson()

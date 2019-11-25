@@ -13,17 +13,13 @@ namespace XiuXianStory
         public Desire TheDesire;
         public bool IsNecessary;//是否必要条件
         /// <summary>目标结果组-提升几率</summary>
-        public Dictionary<string, float> ResultPossiblityMultiDic;
-        public void Lock()
-        {
-            //TODO 物品消耗类提前占有对应物品, 方便多Condition计算最终是否达成条件
-        }
+        public List<Buff> BuffList;
 
-        public Condition AddResult(string groupName, float possibility)
+        public Condition AddBuff(Buff buff)
         {
-            if (ResultPossiblityMultiDic == null)
-                ResultPossiblityMultiDic = new Dictionary<string, float>();
-            ResultPossiblityMultiDic.Add(groupName, possibility);
+            if (BuffList == null)
+                BuffList = new List<Buff>();
+            BuffList.Add(buff);
             return this;
         }
 

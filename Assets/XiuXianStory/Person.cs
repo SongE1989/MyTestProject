@@ -16,6 +16,16 @@ namespace XiuXianStory
 
     }
 
+    /// <summary>行为选择信息(处于第几层, 因为什么原因, 所有的可选条件(只记录, 供后面判断))</summary>
+    public class BehaviorSelectInfo
+    {
+        public int Layer;
+        public bool IsNecessary;
+        public List<Desire> ReasonList;//TODO Reason链, 由于A, 而要做B, 由于B, 要做C, 最终要做D
+        public Dictionary<Item, int> NecessaryRecordBag;//记录必要条件需要的物资
+        public List<Condition> UnnecessaryList;//记录所有可选条件, 用于后面选择
+    }
+
     public class Person : ILevel, INameID
     {
         public string NameID { get; set; }
@@ -31,7 +41,8 @@ namespace XiuXianStory
 
 
         Dictionary<string, float> attrDic = new Dictionary<string, float>();
-        public float this[string key] {
+        public float this[string key]
+        {
             get
             {
                 if (!attrDic.ContainsKey(key))
@@ -45,7 +56,7 @@ namespace XiuXianStory
                 attrDic[key] = value;
             }
         }
-        
+
         /// <summary>人物根源需求</summary>
         public List<Desire> RootDesireList = new List<Desire>();
         public List<Story> StoryList = new List<Story>();
@@ -188,26 +199,15 @@ namespace XiuXianStory
             //从长期需求池中选出[当前长期需求], 并选出对应的[当前需求](若当前长期需求对应行为无法直接执行时)
             if (CurBehaviorProxy == null)
             {
-                refreshCurrentDesireAndBehavior();
+                //刷新短期/长期需求, 并选定要执行的行为
+                refreshCurrentDesireAndBehavior();//?? 获取的CurBehaviour是否满足condition?
 
-                //TODO 190623 扣除Condition中物品消耗
-                //TODO 此处缺陷: 应在决定执行某行为时, 同时确定要满足(消耗)的非必要条件
-                //TODO 需要引入人物性格系统(谨慎-冒险), 来确定是否满足非必要条件
-                for (int i = 0; i < CurBehavior.ConditionList.Count; i++)
-                {
-                    var con = CurBehavior.ConditionList[i];
-                    //TODO BUG 此处若IsNecessary为true, checkCondition不会执行
-                    if (con.IsNecessary || checkCondition(con))
-                    {
-                        //if(con.TheDesire)
-                    }
-                }
 
-                if (CurBehavior != null)
-                {
-                    CurBehaviorProxy = startBehavior(CurBehavior);
-                }
+
+                //TODO startBehavior应描述以怎样的条件开始这项行为(全力以赴/随意为之), 满足哪些非必要条件, 获得哪些增益/减损效果等
+                CurBehaviorProxy = startBehavior(CurBehavior);
             }
+
             bool isFinish = false;
             if (CurBehaviorProxy != null)
             {
@@ -222,7 +222,7 @@ namespace XiuXianStory
                 if (CurLongTimeDesire == CurShortTimeDesire)
                     why = "希望实现 " + CurLongTimeDesire.NameID;
                 else
-                    why = "希望实现 " + CurShortTimeDesire.NameID;//NOTE 此处暂时隐去对应的长期需求的显示
+                    why = "希望实现 " + CurLongTimeDesire.NameID + ", 但需先实现 " + CurShortTimeDesire.NameID;
             }
             else if (CurLongTimeDesire != null && CurShortTimeDesire == null)
                 why = "希望实现 " + CurLongTimeDesire.NameID + ", 却无计可施";
@@ -260,20 +260,20 @@ namespace XiuXianStory
                 TargetBehavior = behavior,
                 DayUsed = 0,
             };
+            //TODO 190623 扣除Condition中物品消耗
             return proxy;
         }
 
         void satisfyDesire(Desire desire)
         {
-            if(desire.AsItemDesire != null)
+            if (desire.AsItemDesire != null)
             {
-                if(desire.AsItemDesire.Consume)
+                if (desire.AsItemDesire.Consume)
                 {
-                    //TODO 此处应计入结果
                     Bag.AddValue(desire.AsItemDesire.TheItem, -desire.AsItemDesire.Num);
                 }
             }
-            else if(desire.AsMultiDesire != null)
+            else if (desire.AsMultiDesire != null)
             {
                 for (int i = 0; i < desire.AsMultiDesire.ChildList.Count; i++)
                 {
@@ -390,11 +390,13 @@ namespace XiuXianStory
         ------1.执行该行为
         ------2.检查非必要条件完成情况, 再根据人物性格(稳重/果断)决定是继续完成非必要条件还是直接执行该行为
         ----2.某条件不满足 => 检查条件Desire
+        //NOTE 当前简易处理为: 满足必要条件即可, 非必要条件若满足, 则启用
          */
         //TODO 管理人物需求, 决定优先满足, 最终决定当前行为
         //TODO 控制人物对需求的选择, 以及对对应行为的筛选(有所为有所不为)
         void refreshCurrentDesireAndBehavior()
         {
+            //此处刷新长期需求(根源需求), 若当前长期需求为Null, 或者已经满足, 则遍历根源需求列表, 选出一个还未满足的需求
             if (CurLongTimeDesire == null || checkDesire(CurLongTimeDesire))
             {
                 CurLongTimeDesire = null;
@@ -402,30 +404,51 @@ namespace XiuXianStory
                 {
                     var desire = RootDesireList[i_des];
                     if (!checkDesire(desire))
+                    {
                         CurLongTimeDesire = desire;
+                    }
                 }
             }
             if (CurLongTimeDesire == null)
+            {
                 return;
+            }
 
-
-            Dictionary<PersonBehavior, int> behavior2LayerDic = new Dictionary<PersonBehavior, int>();
-            Dictionary<PersonBehavior, Desire> behaviorReasonDic = new Dictionary<PersonBehavior, Desire>();
-            getAllBehaviorToBeDone(CurLongTimeDesire, behavior2LayerDic, behaviorReasonDic, 0);
+            //Dictionary<PersonBehavior, int> behavior2LayerDic = new Dictionary<PersonBehavior, int>();
+            //Dictionary<PersonBehavior, Desire> behaviorReasonDic = new Dictionary<PersonBehavior, Desire>();
+            Dictionary<PersonBehavior, BehaviorSelectInfo> behaviorCheckDic = new Dictionary<PersonBehavior, BehaviorSelectInfo>();
+            getAllBehaviorToBeDone(CurLongTimeDesire, behaviorCheckDic, 0);//
+            //TODO CHECK 若该长期需求没有任何可执行的行为, 是否需要重新查找?
 
             int curLayer = 0;
             PersonBehavior tempBehavior = null;
-            //优先做底层任务(既layer较大的)
-            foreach (var pair in behavior2LayerDic)
+            //原则是优先做必要的低级任务(即layer较大的)
+            foreach (var pair in behaviorCheckDic)
             {
-                if (tempBehavior == null || pair.Value > curLayer)
+                var behaviorSelectInfo = pair.Value;
+                if (tempBehavior == null || behaviorSelectInfo.Layer > curLayer)
                 {
                     tempBehavior = pair.Key;
-                    CurShortTimeDesire = behaviorReasonDic[pair.Key];
-                    curLayer = pair.Value;
+                    var reasonList = behaviorCheckDic[pair.Key].ReasonList;
+                    CurShortTimeDesire = reasonList[reasonList.Count - 1];//TODO 191124 add sanity check
+                    curLayer = behaviorSelectInfo.Layer;
                 }
             }
             CurBehavior = tempBehavior;
+
+            //TODO 返回需要执行的非必要条件(考虑人物性格, 经济情况, 性价比等), 此处暂时用遍历并依次满足每个非必要条件, 直到不能满足条件
+            Dictionary<Item, int> recordBag = new Dictionary<Item, int>();
+
+            for (int i = 0; i < CurBehavior.ConditionList.Count; i++)
+            {
+                var con = CurBehavior.ConditionList[i];
+                //TODO BUG 此处若IsNecessary为true, checkCondition不会执行
+                if (con.IsNecessary || checkCondition(con))
+                {
+                    //if(con.TheDesire)
+                    satisfyDesire(con.TheDesire);
+                }
+            }
         }
 
         void recordStory(string why, string what, float messageLevel)
@@ -441,7 +464,17 @@ namespace XiuXianStory
             });
         }
 
-        void getAllBehaviorToBeDone(Desire desire, Dictionary<PersonBehavior, int> behavior2LayerDic, Dictionary<PersonBehavior, Desire> behaviorReasonDic, int layer)
+        //NOTE 191124 这个规划方案不够科学, 可能导致人物不能长远的进行决策(比如需要A地的灵石, 前往A地, 挖1颗灵石, 返回, 执行某行为, 检查发现下个行为也需要灵石, 再次前往A地, 挖1颗灵石
+        //NOTE 191124 应该就某一长远需求, 罗列所有的行为, 并累加类似物品需求的需求(需要新数据结构?), 并一次性罗列所有要进行的行为(必要+可选), 加入列表后依次执行
+        //NOTE 191124 这种长远计划也有一个问题就是总执行时间太长, 中间可能发生其他变故, 导致需要修改计划. 但是可以通过:每隔一段时间, 人物对目标作出总结, 并重新制定计划
+        //NOTE 191124 突然想到, 如果计划过长, 比如炼气期弟子计划渡劫, 灵石条件必然到达一个很高的程度, 这个就不科学了
+
+        //NOTE 191124 还要考虑后期地点系统上线, 影响行为选择的问题(地点拥有的设施可能是必要条件)
+
+        //NOTE 191124 举例: 炼气期弟子的目标链:渡劫--凝婴--结丹--筑基
+
+        //对一个desire, 给出所有相关的执行方案(执行哪个behavior, 有哪些非必要条件, 是否必要)
+        void getAllBehaviorToBeDone(Desire desire, Dictionary<PersonBehavior, BehaviorSelectInfo> behaviorCheckDic, int layer, bool isNecessary)
         {
             List<PersonBehavior> behaviorList = new List<PersonBehavior>();
             DataManager.Instance.GetBehaviorListByDesire(desire, ref behaviorList);
@@ -449,23 +482,75 @@ namespace XiuXianStory
             {
                 var behavior = behaviorList[iBehavior];
 
-                //只记录满足条件的
-                if (checkConditionList(behavior.ConditionList))
+                Dictionary<Item, int> necessaryRecordBag = new Dictionary<Item, int>();
+                bool isBehaviorCanStart = true;
+                //先检查必要条件是否满足
+                for (int iCondition = 0; iCondition < behavior.ConditionList.Count; iCondition++)
                 {
-                    //由于优先做低级任务, 所有Layer记录最子级的
-                    int oldLayer;
-                    if (behavior2LayerDic.TryGetValue(behavior, out oldLayer))
+                    var condition = behavior.ConditionList[iCondition];
+                    if (condition.IsNecessary)
                     {
-                        if (oldLayer < layer)
+                        if (!checkDesireWithRecord(condition.TheDesire, necessaryRecordBag))
                         {
-                            behavior2LayerDic[behavior] = layer;
-                            behaviorReasonDic[behavior] = desire;
+                            isBehaviorCanStart = false;
+                            //当该行为不满足执行条件时, 检查其不满足项所对应的行为, 并加入behaviorCheckDic
+                            //TODO 如何处理ReasonList? 传递?
+                        }
+                    }
+                }
+                //TODO check 未将所有可选行为加入Dic? 导致万全性格人物无法找到所有可选行为?
+
+                if (isBehaviorCanStart)
+                {
+                    //TODO 检查并选择可选条件
+                    List<Condition> unnecessaryList = new List<Condition>();
+                    for (int iCondition = 0; iCondition < behavior.ConditionList.Count; iCondition++)
+                    {
+                        var condition = behavior.ConditionList[iCondition];
+                        if (!condition.IsNecessary)
+                        {
+                            unnecessaryList.Add(condition);
+                            //TODO check 这里是否需要检查可选条件?
+                            //Case1. 可选条件不满足, 是否应该检查其对应的行为, 并加入behaviorCheckDic? 最终在外层按照Layer和Necessary来判断执行哪个?
+                        }
+                    }
+
+                    if (!behaviorCheckDic.ContainsKey(behavior))
+                        behaviorCheckDic.Add(behavior, new BehaviorSelectInfo());
+                    else//有同类任务时, 优先做1.必要 2.低级的任务
+                    {
+
+                    }
+                    var selectInfo = behaviorCheckDic[behavior];
+                    selectInfo.Layer = layer;
+                    
+
+
+                    //TODO 赋值
+                    if (behaviorCheckDic[behavior].ReasonList == null)
+                        behaviorCheckDic[behavior].ReasonList = new List<Desire>();
+                    behaviorCheckDic[behavior].ReasonList.Add(desire);
+                }
+                /*
+                if (checkConditionList(behavior.ConditionList, ref necessaryRecordBag))
+                {
+                    //由于优先做低级任务, 所有Layer只记录最子级的
+                    BehaviorSelectInfo checkInfo;
+                    if (behaviorCheckDic.TryGetValue(behavior, out checkInfo))
+                    {
+                        if (checkInfo.Layer < layer)
+                        {
+                            behaviorCheckDic[behavior] = checkInfo;
                         }
                     }
                     else
                     {
-                        behavior2LayerDic.Add(behavior, layer);
-                        behaviorReasonDic.Add(behavior, desire);
+                        checkInfo = new BehaviorSelectInfo()
+                        {
+                            Layer = layer,
+                            Reason = desire,
+                        };
+                        behaviorCheckDic[behavior] = checkInfo;
                     }
                 }
                 else
@@ -473,14 +558,18 @@ namespace XiuXianStory
                     for (int iCondition = 0; iCondition < behavior.ConditionList.Count; iCondition++)
                     {
                         var condition = behavior.ConditionList[iCondition];
-                        if (checkCondition(condition))
-                            continue;
-                        if (layer < 20)//TODO TEST
-                            getAllBehaviorToBeDone(condition.TheDesire, behavior2LayerDic, behaviorReasonDic, layer + 1);
-                        else
-                            Debug.LogError(desire.NameID + " 查找层级>20, 检查是否Condition-Behavior环状结构");
+                        if (condition.IsNecessary)
+                        {
+                            if (checkCondition(condition))
+                                continue;
+                            if (layer < 20)//TODO TEST
+                                getAllBehaviorToBeDone(condition.TheDesire, behaviorCheckDic, layer + 1);
+                            else
+                                Debug.LogError(desire.NameID + " 查找异常, 层级>20, 检查是否出现Condition-Behavior环状结构(收集灵石需要灵田, 种植灵田需要灵石)");//TODO check 是否可以通过ReasonList来规避环?
+                        }
                     }
                 }
+                */
             }
         }
 
@@ -491,16 +580,26 @@ namespace XiuXianStory
             return checkDesireWithRecord(desire);
         }
 
-        /// <summary>检查一组条件是否"同时"满足(物品消耗类型需要锁物品)</summary>
-        bool checkConditionList(List<Condition> conditionList)
+        /// <summary>TODO 191124 删除此方法 检查一组条件是否"同时"满足</summary>
+        bool checkConditionList(List<Condition> conditionList, ref Dictionary<Item, int> recordBag)
         {
             if (conditionList == null)
                 return true;
 
-            Dictionary<Item, int> recordBag = new Dictionary<Item, int>();
+            if (recordBag == null)
+                recordBag = new Dictionary<Item, int>();
             for (int i = 0; i < conditionList.Count; i++)
             {
-                if (!checkDesireWithRecord(conditionList[i].TheDesire))
+                var condition = conditionList[i];
+                if (condition.IsNecessary)
+                {
+
+                }
+                else
+                {
+
+                }
+                if (!checkDesireWithRecord(condition.TheDesire))
                 {
                     return false;
                 }
@@ -513,7 +612,7 @@ namespace XiuXianStory
             return checkDesireWithRecord(condition.TheDesire);
         }
 
-        /// <summary>累计物品需求</summary>
+        /// <summary>累计物品需求, 注意若不满足, recordBag就不会包含所有物品</summary>
         bool checkDesireWithRecord(Desire desire, Dictionary<Item, int> recordBag = null)
         {
             if (recordBag == null)

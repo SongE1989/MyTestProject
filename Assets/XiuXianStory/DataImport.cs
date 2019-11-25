@@ -50,17 +50,17 @@ namespace XiuXianStory
             BehaviorDic = new Dictionary<string, PersonBehavior>();
             BehaviorDic.AddNameIDItemList(new List<PersonBehavior>()
             {
-                new PersonBehavior(){ NameID = "渡过飞升雷劫", UseTime = 1, MessageLevel = 4},
-                new PersonBehavior(){ NameID = "凝结元婴", UseTime = 9, MessageLevel = 3},
-                new PersonBehavior(){ NameID = "结成金丹", UseTime = 3, MessageLevel = 2},
-                new PersonBehavior(){ NameID = "凝气筑基", UseTime = 1, MessageLevel = 1},
+                new PersonBehavior(){ NameID = "渡过飞升雷劫", UseTime = 16, MessageLevel = 4},
+                new PersonBehavior(){ NameID = "凝结元婴", UseTime = 8, MessageLevel = 3},
+                new PersonBehavior(){ NameID = "结成金丹", UseTime = 4, MessageLevel = 2},
+                new PersonBehavior(){ NameID = "凝气筑基", UseTime = 2, MessageLevel = 1},
                 //new PersonBehavior(){ NameID = "筑基试炼", UseTime = 3},
-                new PersonBehavior(){ NameID = "修炼", UseTime = 1},
-                new PersonBehavior(){ NameID = "采集灵石", UseTime = 1},
+                new PersonBehavior(){ NameID = "修炼", UseTime = 3},
+                new PersonBehavior(){ NameID = "采集灵石", UseTime = 3},
                 //new PersonBehavior(){ NameID = "打理灵田", UseTime = 3},
-                new PersonBehavior(){ NameID = "凝聚灵石", UseTime = 1},
-                new PersonBehavior(){ NameID = "炼制寿元丹", UseTime = 6, MessageLevel = 3},
-                new PersonBehavior(){ NameID = "服用寿元丹", UseTime = 1, MessageLevel = 3},
+                new PersonBehavior(){ NameID = "凝聚灵石", UseTime = 2},
+                new PersonBehavior(){ NameID = "炼制寿元丹", UseTime = 7, MessageLevel = 3},
+                new PersonBehavior(){ NameID = "服用寿元丹", UseTime = 2, MessageLevel = 3},
                 //new PersonBehavior(){ NameID = "开垦灵田", UseTime = 10, MessageLevel = 1},
             });
 
@@ -119,17 +119,17 @@ namespace XiuXianStory
         {
             BehaviorDic["凝气筑基"].ConditionList = new List<Condition>(){
                 new Condition(){ TheDesire = DesireDic["炼气期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["筑基丹"],1, true), IsNecessary = false }.AddResult("成功",1.5f),
+                new Condition(){ TheDesire = new ItemDesire(ItemDic["筑基丹"],1, true), IsNecessary = false }.AddBuff(new Buff("成功",1.5f)),
                 new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],100, true), IsNecessary = true},
             };
             BehaviorDic["结成金丹"].ConditionList = new List<Condition>(){
                 new Condition(){ TheDesire = DesireDic["筑基期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["金髓丸"],1, true), IsNecessary = false }.AddResult("成功",1.5f),
+                new Condition(){ TheDesire = new ItemDesire(ItemDic["金髓丸"],1, true), IsNecessary = false }.AddBuff(new Buff("成功",1.5f)),
                 new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],500, true), IsNecessary = true },
             };
             BehaviorDic["凝结元婴"].ConditionList = new List<Condition>(){
                 new Condition(){ TheDesire = DesireDic["金丹期"] , IsNecessary = true },
-                new Condition(){ TheDesire = new ItemDesire(ItemDic["凝婴丹"],1, true), IsNecessary = false }.AddResult("成功",1.5f),
+                new Condition(){ TheDesire = new ItemDesire(ItemDic["凝婴丹"],1, true), IsNecessary = false }.AddBuff(new Buff("成功",1.5f)),
                 new Condition(){ TheDesire = new ItemDesire(ItemDic["灵石"],1000, true), IsNecessary = true },
             };
             BehaviorDic["渡过飞升雷劫"].ConditionList = new List<Condition>(){
@@ -141,7 +141,7 @@ namespace XiuXianStory
                         new ItemDesire(ItemDic["水灵石"],1, true),
                         new ItemDesire(ItemDic["火灵石"],1, true),
                         new ItemDesire(ItemDic["土灵石"],1, true),
-                    } }, IsNecessary = false}.AddResult("成功",1.5f),
+                    } }, IsNecessary = false}.AddBuff(new Buff("成功",1.5f)),
             };
             //BehaviorDic["打理灵田"].ConditionList = new List<Condition>() {
             //    new Condition(){ TheDesire = new ItemDesire(ItemDic["灵田"], 1, false), IsNecessary =true }
